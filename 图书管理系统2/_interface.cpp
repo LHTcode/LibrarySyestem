@@ -41,15 +41,11 @@ string& _interface::FirstChoose()
 	for (int i = 0;i < 70;++i)
 	{
 		printf("-");
-	}
-	*/
+	}*/
 	printf("\n请选择：");
+
 	static string choose;
 	cin >> choose;
-	/*清空缓冲区*/
-	char c;
-	while (c = getchar() != '\n') {}
-
 	unsigned int len = choose.length();
 	while (len != 1)
 	{
@@ -57,6 +53,9 @@ string& _interface::FirstChoose()
 		cin >> choose;
 		len = choose.length();		/*保证输入仅一个字符*/
 	}
+	/*清空缓冲区*/
+	char c;
+	while (c = getchar() != '\n') {}
 	return choose;
 }
 
@@ -137,8 +136,8 @@ void _interface::ReaderInterface()
 	{
 		printf("-");
 	}
-	*/printf("\n请选择：");
-
+	printf("\n请选择：");
+	*/
 }
 
 void _interface::AdministratorInterface()

@@ -44,11 +44,13 @@ short ClientJudgment(std::string& choose)
 	if (choose.find("A") != std::string::npos)
 	{
 		/*读者*/
+		UserInformation::ReOrAdmin = 1;
 		return 1;
 	}
 	else if (choose.find("B") != std::string::npos)
 	{
 		/*管理员*/
+		UserInformation::ReOrAdmin = 2;
 		return 2;
 	}
 }

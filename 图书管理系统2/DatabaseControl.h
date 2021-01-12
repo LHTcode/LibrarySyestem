@@ -15,14 +15,15 @@ public:
 	char*& PasswordSerch(int& choose, char(&ID)[100], DatabaseControl& con);
 	
 	/*修改用户密码函数*/
-	void PasswordChange(char(&ID)[100]);
+	short PasswordChange(std::string NewPassword,DatabaseControl PW_con);
+
 	~DatabaseControl()
 	{
 		/*释放句柄、断开连接*/
 		ret = SQLDisconnect(hdbc);
 		ret = SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
 		ret = SQLFreeHandle(SQL_HANDLE_ENV, henv);
-		ret = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+		//ret = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
 	}
 private:
 	SQLHANDLE henv = NULL;		//声明环境句柄

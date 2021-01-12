@@ -140,7 +140,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DatabaseControl.cpp" />
-    <ClCompile Include="PasswordChange.cpp" />
     <ClCompile Include="Reader.cpp" />
     <ClCompile Include="Sign.cpp" />
     <ClCompile Include="UserInformation.cpp" />
@@ -149,7 +148,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DatabaseControl.h" />
-    <ClInclude Include="PasswordChange.h" />
     <ClInclude Include="Reader.h" />
     <ClInclude Include="Sign.h" />
     <ClInclude Include="SQLHead.h" />

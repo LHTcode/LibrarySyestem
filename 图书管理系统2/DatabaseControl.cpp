@@ -1,6 +1,7 @@
 #include"SQLHead.h"
 #include<iostream>
 #include"DatabaseControl.h"
+#include"UserInformation.h"
 /***********数据库连接************/
 #define	SQLSUCCESS(rc) ((rc == SQL_SUCCESS) || (rc == SQL_SUCCESS_WITH_INFO))
 void DatabaseControl::DatabaseConnect()
@@ -54,7 +55,7 @@ char*& DatabaseControl::PasswordSerch(int& choose, char(&ID)[100],DatabaseContro
 		{
 			exit(-1);
 		}
-		static char* Password = new char[7];
+		char* Password = new char[7];
 		*Password = NULL;		//将Password置空
 		long cbPassword = 0;
 		ret = SQLBindCol(hstmt, 1, SQL_C_CHAR, Password, 7, &cbPassword);
@@ -104,7 +105,103 @@ char*& DatabaseControl::PasswordSerch(int& choose, char(&ID)[100],DatabaseContro
 	
 }
 
-void DatabaseControl::PasswordChange(char(&ID)[100])
+short DatabaseControl::PasswordChange(std::string NewPassword, DatabaseControl PW_con)
 {
+	SQLRETURN ret;
+	ret = SQLAllocHandle(SQL_HANDLE_STMT, PW_con.hdbc, &PW_con.hstmt);
+	ret = SQLSetStmtAttr(PW_con.hstmt, SQL_ATTR_ROW_BIND_TYPE, (SQLPOINTER)SQL_PARAM_BIND_BY_COLUMN, SQL_IS_INTEGER);
+	switch (UserInformation::ReOrAdmin)
+	{
+	case 1:
+	{/*学生端*/
+		std::string set = "UPDATE stuPassword SET StuPassword = ";
+		std::string combine1 = set + '\'' + NewPassword + '\'';
+		std::string where = "WHERE StuID = ";
+		std::string combine2 = where + '\'' + UserInformation::m_ID + '\'';
+		std::string finalcombine = combine1 + combine2;
+		const char* SQLSentence = finalcombine.c_str();
+		char SQLPassword[20] = "";
+		char SQLID[20] = "";
+		short cnt = 0;
+		long Plen = 0;
+		long Ilen = 0;
+		/*为了能将Password放进SQLBindParameter语句里面，将string换成char[]*/
+		while (NewPassword[cnt] != NULL)
+		{
+			SQLPassword[cnt] = NewPassword[cnt];
+			++cnt;
+		}
+		cnt = 0;
+		while (UserInformation::m_ID[cnt] != NULL)
+		{
+			SQLID[cnt] = UserInformation::m_ID[cnt];
+			++cnt;
+		}
+		ret = SQLPrepare(PW_con.hstmt, (SQLCHAR*)SQLSentence, SQL_NTS);
+		if (!SQLSUCCESS(ret))
+		{
+			printf("SQLPrepare 错误！！");
+			exit(-1);
+		}
+		ret = SQLBindParameter(PW_con.hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_CHAR, 20, 0, SQLPassword, 20, &Plen);
+		ret = SQLBindParameter(PW_con.hstmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_CHAR, 20, 0, SQLID, 20, &Ilen);
+		if (!SQLSUCCESS(ret))
+		{
+			printf("SQLBindParameter 错误！！");
+			exit(-1);
+		}
+		ret = SQLExecute(PW_con.hstmt);
+		if (!SQLSUCCESS(ret))
+		{
+			printf("SQLExecute 错误！！");
+			exit(-1);
+		}
+		return ret;
+	}
+	case 2:
+	{/*管理员端*/
+		std::string set = "UPDATE adminPassword SET AdminPassword = ";
+		std::string combine1 = set + '\'' + NewPassword + '\'';
+		std::string where = "WHERE adminID = ";
+		std::string combine2 = where + '\'' + UserInformation::m_ID + '\'';
+		const char* SQLSentence = combine2.c_str();
+		char SQLPassword[20] = "";
+		char SQLID[20] = "";
+		short cnt = 0;
+		long Plen = 0;
+		long Ilen = 0;
+		/*为了能将Password放进SQLBindParameter语句里面，将string换成char[]*/
+		while (NewPassword[cnt] != NULL)
+		{
+			SQLPassword[cnt] = NewPassword[cnt];
+			++cnt;
+		}
+		cnt = 0;
+		while (UserInformation::m_ID[cnt] != NULL)
+		{
+			SQLID[cnt] = UserInformation::m_ID[cnt];
+			++cnt;
+		}
+		ret = SQLPrepare(hstmt, (SQLCHAR*)SQLSentence, SQL_NTS);
+		if (!SQLSUCCESS(ret))
+		{
+			exit(-1);
+		}
+		ret = SQLBindParameter(PW_con.hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_CHAR, 20, 0, SQLPassword, 20, &Plen);
+		ret = SQLBindParameter(PW_con.hstmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_CHAR, 20, 0, SQLID, 20, &Ilen);
+		if (!SQLSUCCESS(ret))
+		{
+			exit(-1);
+		}
+		ret = SQLExecute(hstmt);
+		if (!SQLSUCCESS(ret))
+		{
+			exit(-1);
+		}
+		return ret;
+	}
+	}
+	
+
 
 }

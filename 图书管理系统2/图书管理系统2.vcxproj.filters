@@ -27,9 +27,6 @@
     <ClCompile Include="DatabaseControl.cpp">
       <Filter>资源文件\源文件</Filter>
     </ClCompile>
-    <ClCompile Include="PasswordChange.cpp">
-      <Filter>资源文件\源文件</Filter>
-    </ClCompile>
     <ClCompile Include="Reader.cpp">
       <Filter>资源文件\源文件</Filter>
     </ClCompile>
@@ -51,9 +48,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="SQLHead.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="PasswordChange.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Reader.h">
