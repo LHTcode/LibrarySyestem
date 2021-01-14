@@ -3,9 +3,11 @@
 class Reader 
 {
 public:
-	void ReaderOperate();
+	void ReaderOperate() const;
 
-	void ChangePassword();
+	void ChangePassword() const;
+
+	void BookSerch() const;
 
 
 

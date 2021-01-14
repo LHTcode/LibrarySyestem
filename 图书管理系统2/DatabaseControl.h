@@ -15,8 +15,10 @@ public:
 	char*& PasswordSerch(int& choose, char(&ID)[100], DatabaseControl& con);
 	
 	/*修改用户密码函数*/
-	short PasswordChange(std::string NewPassword,DatabaseControl PW_con);
+	short PasswordChange(std::string NewPassword, DatabaseControl& PW_con);
 
+	/*图书查询函数*/
+	void SerchBookInformation(std::string BookName, DatabaseControl& con);
 	~DatabaseControl()
 	{
 		/*释放句柄、断开连接*/

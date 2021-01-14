@@ -204,7 +204,6 @@ void _interface::ReaderChoose()
 		string choose = "";
 		do
 		{
-			cout << flush;	
 			cin >> choose;
 			do
 			{/*检测到exit则返回上一级目录*/
@@ -218,6 +217,7 @@ void _interface::ReaderChoose()
 			}
 			break;
 		} while (1);
+		system("cls");
 		/*清空缓冲区*/
 		char c;
 		while (c = getchar() != '\n') {}
@@ -229,7 +229,7 @@ void _interface::ReaderChoose()
 
 			break;
 		case 'B':
-
+			re.BookSerch();
 			break;
 		case 'C':
 
@@ -304,23 +304,28 @@ void _interface::AdministratorChoose()
 }
 
 /*"返回上一级目录"专区*/
-jmp_buf first_jump;
+jmp_buf home_page_jump;
 void _interface::Exit(short, std::string str)
 {
 	
 	if (str.find("exit")!=std::string::npos)
 	{
 		system("cls");
-		longjmp(first_jump, 1);
+		longjmp(home_page_jump, 1);
 	}
 }
 
-jmp_buf second_jump;
+jmp_buf secondary_inerface_jump;
 void _interface::Exit(short, short, std::string str)
 {
 	if (str.find("exit") != std::string::npos)
 	{
 		system("cls");
-		longjmp(second_jump, 1);
+		longjmp(secondary_inerface_jump, 1);
 	}
+}
+
+void _interface::autoExit()
+{
+	longjmp(secondary_inerface_jump, 1);
 }

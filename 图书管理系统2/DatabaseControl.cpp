@@ -105,7 +105,7 @@ char*& DatabaseControl::PasswordSerch(int& choose, char(&ID)[100],DatabaseContro
 	
 }
 
-short DatabaseControl::PasswordChange(std::string NewPassword, DatabaseControl PW_con)
+short DatabaseControl::PasswordChange(std::string NewPassword, DatabaseControl& PW_con)
 {
 	SQLRETURN ret;
 	ret = SQLAllocHandle(SQL_HANDLE_STMT, PW_con.hdbc, &PW_con.hstmt);
@@ -164,7 +164,8 @@ short DatabaseControl::PasswordChange(std::string NewPassword, DatabaseControl P
 		std::string combine1 = set + '\'' + NewPassword + '\'';
 		std::string where = "WHERE adminID = ";
 		std::string combine2 = where + '\'' + UserInformation::m_ID + '\'';
-		const char* SQLSentence = combine2.c_str();
+		std::string finalcombine = combine1 + combine2;
+		const char* SQLSentence = finalcombine.c_str();
 		char SQLPassword[20] = "";
 		char SQLID[20] = "";
 		short cnt = 0;
@@ -182,7 +183,7 @@ short DatabaseControl::PasswordChange(std::string NewPassword, DatabaseControl P
 			SQLID[cnt] = UserInformation::m_ID[cnt];
 			++cnt;
 		}
-		ret = SQLPrepare(hstmt, (SQLCHAR*)SQLSentence, SQL_NTS);
+		ret = SQLPrepare(PW_con.hstmt, (SQLCHAR*)SQLSentence, SQL_NTS);
 		if (!SQLSUCCESS(ret))
 		{
 			exit(-1);
@@ -193,7 +194,7 @@ short DatabaseControl::PasswordChange(std::string NewPassword, DatabaseControl P
 		{
 			exit(-1);
 		}
-		ret = SQLExecute(hstmt);
+		ret = SQLExecute(PW_con.hstmt);
 		if (!SQLSUCCESS(ret))
 		{
 			exit(-1);
@@ -204,4 +205,58 @@ short DatabaseControl::PasswordChange(std::string NewPassword, DatabaseControl P
 	
 
 
+}
+
+
+
+
+void DatabaseControl::SerchBookInformation(std::string BookName,DatabaseControl& BS_con)
+{
+	SQLRETURN ret;
+	ret = SQLAllocHandle(SQL_HANDLE_STMT, BS_con.hdbc, &BS_con.hstmt);
+	ret = SQLSetStmtAttr(BS_con.hstmt, SQL_ATTR_ROW_BIND_TYPE, (SQLPOINTER)SQL_PARAM_BIND_BY_COLUMN, SQL_IS_INTEGER);
+	if (!SQLSUCCESS(ret))
+	{
+		exit(-1);
+	}
+	std::string select = "SELECT* FROM BOOK WHERE BookName = ";
+	std::string combine = select + '\'' + BookName + '\'';
+	const char* SQLSentence = combine.c_str();
+	ret = SQLPrepare(BS_con.hstmt, (SQLCHAR*)SQLSentence, SQL_NTS);
+	if (!SQLSUCCESS(ret))
+	{
+		exit(-1);
+	}
+	char ISBN[20] = "", Name[20] = "", Author[20] = "", Isborrowed[5] = "",
+		Permission[20] = "", Addr[25] = "", Press[20] = "", Introduction[1000] = "";
+	long cbISBN = 0, cbName = 0, cbAuthor = 0, cbIsborrowed = 0,
+		cbPermission = 0, cbAddr = 0, cbPress = 0, cbIntroduction = 0;
+	
+	ret = SQLBindCol(BS_con.hstmt, 1, SQL_C_CHAR, ISBN, 20, &cbISBN);
+	ret = SQLBindCol(BS_con.hstmt, 2, SQL_C_CHAR, Name, 20, &cbName);
+	ret = SQLBindCol(BS_con.hstmt, 3, SQL_C_CHAR, Author, 20, &cbAuthor);
+	ret = SQLBindCol(BS_con.hstmt, 4, SQL_C_CHAR, Isborrowed, 5, &cbIsborrowed);
+	ret = SQLBindCol(BS_con.hstmt, 5, SQL_C_CHAR, Permission, 20, &cbPermission);
+	ret = SQLBindCol(BS_con.hstmt, 6, SQL_C_CHAR, Addr, 25, &cbAddr);
+	ret = SQLBindCol(BS_con.hstmt, 7, SQL_C_CHAR, Press, 20, &cbPress);
+	ret = SQLBindCol(BS_con.hstmt, 8, SQL_C_CHAR, Introduction, 1000, &cbIntroduction);
+	if (!SQLSUCCESS(ret))
+	{
+		exit(-1);
+	}
+	ret = SQLExecute(BS_con.hstmt);
+	while (ret = SQLFetchScroll(hstmt, SQL_FETCH_NEXT, 0) != SQL_NO_DATA_FOUND)
+	{
+		;
+	}
+	do
+	{
+		if (ISBN[0] == '\0')
+		{
+			printf("\n暂无此书信息\n");
+			continue;
+		}
+		printf("\n书名：%s\n\nISBC号：%s\n\n作者：%s\n\n出版社：%s\n\n图书状态：%s\n\n本书馆藏地址：%s\n\n简介：%s\n\n", Name,
+			ISBN, Author, Press, Permission, Addr, Introduction);
+	} while (0);
 }

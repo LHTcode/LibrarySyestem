@@ -2,15 +2,14 @@
 #include"SQLHead.h"
 #define	SQLSUCCESS(rc) ((rc == SQL_SUCCESS) || (rc == SQL_SUCCESS_WITH_INFO))
 
-void Reader::ReaderOperate()
+void Reader::ReaderOperate() const 
 {
 	_interface inter;
 	inter.ReaderInterface();	
 	this->inter->ReaderChoose();
 }
 
-jmp_buf password_jump;
-void Reader::ChangePassword()
+void Reader::ChangePassword() const
 {
 	std::string OldPassword;
 	std::string first_NewPassword = "";
@@ -63,9 +62,31 @@ void Reader::ChangePassword()
 		Sleep(1000);
 	}
 	system("cls");
-	longjmp(password_jump, 1);
+	_interface::autoExit();
 
 }
-/****1月12日修改：
-解决了跳转bug问题，完成了读者端的密码修改模块
-下一步将完成管理员端的密码修改模块，并完成读者查询图书模块****/
+
+
+void Reader::BookSerch() const
+{
+	DatabaseControl BS_con;
+	std::string BookName;
+	std::string BookInformation;
+	while (1)
+	{
+		printf("请输入你想查询的图书全名：");
+		std::getline(std::cin, BookName);
+		/*要实现查书需要几个步骤：
+			1.我输入需要的书名；
+			2.系统从Database中调取该书的信息反馈给我
+			3.用system("pause")提示用户按任意键继续，用户按任意键后清屏，再次弹出查询界面
+			4.需要有exit返回上一级目录功能*/
+
+		_interface::Exit(1, 1, BookName);
+
+		BS_con.SerchBookInformation(BookName, BS_con);
+		system("pause");
+		system("cls");
+	}
+
+}
