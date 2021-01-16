@@ -2,6 +2,7 @@
 #include<iostream>
 #include"DatabaseControl.h"
 #include"UserInformation.h"
+#include"_interface.h"
 /***********数据库连接************/
 #define	SQLSUCCESS(rc) ((rc == SQL_SUCCESS) || (rc == SQL_SUCCESS_WITH_INFO))
 void DatabaseControl::DatabaseConnect()
@@ -259,4 +260,53 @@ void DatabaseControl::SerchBookInformation(std::string BookName,DatabaseControl&
 		printf("\n书名：%s\n\nISBC号：%s\n\n作者：%s\n\n出版社：%s\n\n图书状态：%s\n\n本书馆藏地址：%s\n\n简介：%s\n\n", Name,
 			ISBN, Author, Press, Permission, Addr, Introduction);
 	} while (0);
+}
+
+
+BOOL DatabaseControl::Borrow(std::string ISBN,DatabaseControl& borrow_con)
+{
+	SQLRETURN ret;
+	ret = SQLAllocHandle(SQL_HANDLE_STMT, borrow_con.hdbc, &borrow_con.hstmt);
+	ret = SQLSetStmtAttr(borrow_con.hstmt, SQL_ATTR_ROW_BIND_TYPE, (SQLPOINTER)SQL_PARAM_BIND_BY_COLUMN, SQL_IS_INTEGER);
+	if (!SQLSUCCESS(ret))
+	{
+		exit(-1);
+	}
+	/*事务控制：查询该书籍状态，状态为可借用则用户借书数量+1，
+	并将书名存入用户借书名称数据中，修改该书籍的状态为不可借*/
+	std::string YesorNot;
+	std::string swhere = "SELECT BookName FROM BOOK WHERE ISBN = ";
+	std::string combine1 = swhere + '\'' + ISBN + '\'';
+	const char* SQLSentence = combine1.c_str();
+	ret = SQLPrepare(borrow_con.hstmt, (SQLCHAR*)SQLSentence, SQL_NTS);
+	if (!SQLSUCCESS(ret))
+	{
+		exit(-1);
+	}
+	char BookName[30] = "";
+	long BookName_len = 0;
+	ret = SQLBindCol(borrow_con.hstmt, 1, SQL_C_CHAR, 0, 30, &BookName_len);
+	ret = SQLExecute(borrow_con.hstmt);
+	if (!SQLSUCCESS(ret))
+	{
+		std::cerr << "该书不存在！" << std::endl;
+		Sleep(700);
+		system("cls");
+		return 0;
+	}
+	if(ret = SQLFetchScroll(borrow_con.hstmt,SQL_FETCH_NEXT,0) != SQL_NO_DATA_FOUND)
+	{ 
+
+	}
+	if (BookName != "")
+	{
+		std::cout << "是否确认借 " << BookName << " 这本书？" << std::endl;
+		std::cout << "是      否" << std::endl;
+		std::cin >> YesorNot;
+		if (YesorNot.find("是") == std::string::npos)
+		{
+			return 0;
+		}
+	}
+	std::string update = "begin tran UPDATE +"
 }

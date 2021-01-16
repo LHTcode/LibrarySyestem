@@ -19,6 +19,10 @@ public:
 
 	/*图书查询函数*/
 	void SerchBookInformation(std::string BookName, DatabaseControl& con);
+
+	/*借书函数*/
+	BOOL Borrow(std::string ISBN, DatabaseControl& borrow_con);
+
 	~DatabaseControl()
 	{
 		/*释放句柄、断开连接*/

@@ -62,7 +62,7 @@ void Reader::ChangePassword() const
 		Sleep(1000);
 	}
 	system("cls");
-	_interface::autoExit();
+	_interface::autoExit(1,1);
 
 }
 
@@ -88,5 +88,34 @@ void Reader::BookSerch() const
 		system("pause");
 		system("cls");
 	}
+
+}
+
+void Reader::BorrowBook() const
+{
+	/*实现借书功能的几个步骤：
+		1.用户输入ISBN号，系统查询该书籍；
+		2.查询失败返回失败信息，查询成功系统向用户确认是否借用该书；
+		3.用户否定则返回借书界面，用户确认则系统修改数据库信息：增加用户借书数量，存入用户借书书名
+			修改书籍状态信息，禁止其他用户借用该书籍，我这里假设整个图书馆一类书只有一本（doge）
+		4.若借书失败，中断上述流程并返回错误信息
+		5.借书成功则返回成功信息，返回到借书界面
+		6.借书界面需要有exit返回上一级目录功能*/
+	DatabaseControl borrow_con;
+	std::string ISBN;
+	while (1)
+	{
+		printf("请输入你想借的书的ISBN号：");
+		std::getline(std::cin, ISBN);
+		std::string BookName;
+		BOOL bl = 0;
+		bl = borrow_con.Borrow(ISBN, borrow_con);
+		if (0 ==bl)
+		{
+			continue;
+		}
+		
+	}
+
 
 }

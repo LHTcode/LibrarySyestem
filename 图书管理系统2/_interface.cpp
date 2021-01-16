@@ -325,7 +325,7 @@ void _interface::Exit(short, short, std::string str)
 	}
 }
 
-void _interface::autoExit()
+void _interface::autoExit(short,short)
 {
 	longjmp(secondary_inerface_jump, 1);
 }

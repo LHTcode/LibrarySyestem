@@ -9,6 +9,7 @@ public:
 
 	void BookSerch() const;
 
+	void BorrowBook() const;
 
 
 private:
