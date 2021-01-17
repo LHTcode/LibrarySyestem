@@ -1,11 +1,5 @@
 ﻿  DatabaseControl.cpp
-  Reader.cpp
-  Sign.cpp
-  _interface.cpp
-  图书管理系统2.cpp
-  正在生成代码...
-C:\Users\李\source\repos\图书管理系统2\图书管理系统2\Sign.cpp(56): warning C4715: “ClientJudgment”: 不是所有的控件路径都返回值
-C:\Users\李\source\repos\图书管理系统2\图书管理系统2\DatabaseControl.cpp(106): warning C4715: “DatabaseControl::PasswordSerch”: 不是所有的控件路径都返回值
-C:\Users\李\source\repos\图书管理系统2\图书管理系统2\DatabaseControl.cpp(208): warning C4715: “DatabaseControl::PasswordChange”: 不是所有的控件路径都返回值
-C:\Users\李\source\repos\图书管理系统2\图书管理系统2\DatabaseControl.cpp(72): warning C4172: 返回局部变量或临时变量的地址: Password
+C:\Users\李\source\repos\图书管理系统2\图书管理系统2\DatabaseControl.cpp(108): warning C4715: “DatabaseControl::PasswordSerch”: 不是所有的控件路径都返回值
+C:\Users\李\source\repos\图书管理系统2\图书管理系统2\DatabaseControl.cpp(207): warning C4715: “DatabaseControl::PasswordChange”: 不是所有的控件路径都返回值
+C:\Users\李\source\repos\图书管理系统2\图书管理系统2\DatabaseControl.cpp(74): warning C4172: 返回局部变量或临时变量的地址: Password
   图书管理系统2.vcxproj -> C:\Users\李\source\repos\图书管理系统2\Debug\图书管理系统2.exe

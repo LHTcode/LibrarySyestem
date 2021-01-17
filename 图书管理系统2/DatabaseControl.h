@@ -21,7 +21,7 @@ public:
 	void SerchBookInformation(std::string BookName, DatabaseControl& con);
 
 	/*½èÊéº¯Êý*/
-	BOOL Borrow(std::string ISBN, DatabaseControl& borrow_con);
+	BOOL Borrow(std::string ISBN, DatabaseControl*& borrow_con);
 
 	~DatabaseControl()
 	{

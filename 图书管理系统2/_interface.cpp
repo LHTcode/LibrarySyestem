@@ -232,7 +232,7 @@ void _interface::ReaderChoose()
 			re.BookSerch();
 			break;
 		case 'C':
-
+			re.BorrowBook();
 			break;
 		case 'D':
 
