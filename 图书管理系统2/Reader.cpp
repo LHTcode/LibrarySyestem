@@ -101,20 +101,17 @@ void Reader::BorrowBook() const
 		4.若借书失败，中断上述流程并返回错误信息
 		5.借书成功则返回成功信息，返回到借书界面
 		6.借书界面需要有exit返回上一级目录功能*/
-	DatabaseControl* borrow_con = new DatabaseControl();
+	
 	std::string ISBN;
 	while (1)
 	{
+		DatabaseControl* borrow_con = new DatabaseControl();
 		printf("请输入你想借的书的ISBN号：");
-		/*清空缓冲区*/
-		char c;
-		while (c = getchar() != '\n') {}
-
 		std::getline(std::cin, ISBN);
 		inter->Exit(1, 1,ISBN);
 		BOOL bl = 0;
 		bl = borrow_con->Borrow(ISBN, borrow_con);
-		if (0 ==bl)
+		if (0 == bl)
 		{
 			continue;
 		}
@@ -122,9 +119,24 @@ void Reader::BorrowBook() const
 		{
 			printf("借书成功！");
 			Sleep(1000);
+			system("cls");
 		}
 
 	}
+}
+
+void Reader::SelfInformation() const
+{
+	DatabaseControl* selfinfor_con = new DatabaseControl();
+	selfinfor_con->SelfInformationPrint(selfinfor_con);
+	_interface::autoExit(1, 1);
+}
+
+void Reader::ReturnBook() const
+{
+	DatabaseControl* returnbook_con = new DatabaseControl();
+	std::string ISBN;
+	returnbook_con->ReturnBook(ISBN, returnbook_con);
 
 
 }

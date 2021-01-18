@@ -23,6 +23,12 @@ public:
 	/*借书函数*/
 	BOOL Borrow(std::string ISBN, DatabaseControl*& borrow_con);
 
+	/*用户信息打印函数*/
+	void SelfInformationPrint(DatabaseControl*& selfinfor_con);
+
+	/*读者还书函数*/
+	BOOL ReturnBook(std::string ISBN,DatabaseControl*& returnbook_con);
+
 	~DatabaseControl()
 	{
 		/*释放句柄、断开连接*/

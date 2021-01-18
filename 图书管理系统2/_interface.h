@@ -24,7 +24,7 @@ public:
 	/*****我希望能够实现不分大小写的功能，寒假想想办法*****/
 	static void Exit(short, std::string str);		//用于读者管理员界面选择退出
 	static void Exit(short, short, std::string str);//用于用户登录界面退出
-	static void autoExit(short,short);
+	static void autoExit(short,short);				//返回到用户选择界面
 
 
 };

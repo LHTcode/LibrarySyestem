@@ -11,6 +11,9 @@ public:
 
 	void BorrowBook() const;
 
+	void SelfInformation() const;
+
+	void ReturnBook() const;
 
 private:
 	_interface* inter;

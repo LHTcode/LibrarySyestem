@@ -226,7 +226,7 @@ void _interface::ReaderChoose()
 		switch (*ch)
 		{
 		case 'A':
-
+			re.SelfInformation();
 			break;
 		case 'B':
 			re.BookSerch();

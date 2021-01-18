@@ -285,33 +285,32 @@ BOOL DatabaseControl::Borrow(std::string ISBN,DatabaseControl*& borrow_con)
 	long BookName_len = 0;
 	ret = SQLBindCol(borrow_con->hstmt, 1, SQL_C_CHAR, BookName, 30, &BookName_len);
 	ret = SQLExecute(borrow_con->hstmt);
-	if (!SQLSUCCESS(ret))
+	if(ret = SQLFetchScroll(borrow_con->hstmt,SQL_FETCH_NEXT,0) != SQL_NO_DATA_FOUND)
+	{ 
+
+	}
+	std::string sBookName(BookName);
+	if (sBookName.empty())
 	{
 		std::cerr << "该书不存在！" << std::endl;
 		Sleep(700);
 		system("cls");
 		return 0;
 	}
-	if(ret = SQLFetchScroll(borrow_con->hstmt,SQL_FETCH_NEXT,0) != SQL_NO_DATA_FOUND)
-	{ 
-
-	}
-	if (BookName != "")
+	
+	if (!sBookName.empty())
 	{
 		std::cout << "是否确认借 " << BookName << " 这本书？" << std::endl;
 		std::cout << "是      否" << std::endl;
-		std::cin >> YesorNot;
+		std::getline(std::cin,YesorNot);
 		if (YesorNot.find("是") == std::string::npos)
 		{
 			return 0;
 		}
 	}
 
-	delete borrow_con;
-	/***从这里开始就失败了！！！！！！！！！！！！！！！！！！***/
-	borrow_con = new DatabaseControl();
-	ret = SQLAllocHandle(SQL_HANDLE_STMT, borrow_con->hdbc, &borrow_con->hstmt);
-	ret = SQLSetStmtAttr(borrow_con->hstmt, SQL_ATTR_ROW_BIND_TYPE, (SQLPOINTER)SQL_PARAM_BIND_BY_COLUMN, SQL_IS_INTEGER);
+	delete borrow_con;		//释放句柄和环境
+	borrow_con = new DatabaseControl();		//重置句柄和环境
 	ret = SQLAllocHandle(SQL_HANDLE_STMT, borrow_con->hdbc, &borrow_con->hstmt);
 	ret = SQLSetStmtAttr(borrow_con->hstmt, SQL_ATTR_ROW_BIND_TYPE, (SQLPOINTER)SQL_PARAM_BIND_BY_COLUMN, SQL_IS_INTEGER);
 	std::string swhere1 = "SELECT BorrowedBookNum,BorrowedBookName FROM StuBook WHERE StuID = ";
@@ -321,7 +320,6 @@ BOOL DatabaseControl::Borrow(std::string ISBN,DatabaseControl*& borrow_con)
 	ret = SQLPrepare(borrow_con->hstmt, (SQLCHAR*)SQLSentence, SQL_NTS);
 	if (!SQLSUCCESS(ret))
 	{
-		printf("prepare failed !");
 		exit(-1);
 	}
 	char cnum[10] = "";
@@ -331,13 +329,11 @@ BOOL DatabaseControl::Borrow(std::string ISBN,DatabaseControl*& borrow_con)
 	ret = SQLBindCol(borrow_con->hstmt, 2, SQL_C_CHAR, cname, 30, &cname_len);
 	if (!SQLSUCCESS(ret))
 	{
-		printf("bindcol1 failed!!");
 		exit(-1);
 	}
 	ret = SQLExecute(borrow_con->hstmt);
 	if (!SQLSUCCESS(ret))
 	{
-		printf("execute1 failed!");
 		exit(-1);
 	}
 	if (ret = SQLFetch(borrow_con->hstmt) != SQL_NO_DATA_FOUND)
@@ -350,12 +346,11 @@ BOOL DatabaseControl::Borrow(std::string ISBN,DatabaseControl*& borrow_con)
 	ret = SQLAllocHandle(SQL_HANDLE_STMT, borrow_con->hdbc, &borrow_con->hstmt);
 	ret = SQLSetStmtAttr(borrow_con->hstmt, SQL_ATTR_ROW_BIND_TYPE, (SQLPOINTER)SQL_PARAM_BIND_BY_COLUMN, SQL_IS_INTEGER);
 	std::string swhere2 = " SELECT Isborrowed FROM BOOK WHERE ISBN = ";
-	std::string combine2 = combine1 + swhere2 + '\'' + ISBN + '\'';
+	std::string combine2 = swhere2 + '\'' + ISBN + '\'';
 	SQLSentence = combine2.c_str();
 	ret = SQLPrepare(borrow_con->hstmt, (SQLCHAR*)SQLSentence, SQL_NTS);
 	if (!SQLSUCCESS(ret))
 	{
-		printf("prepare2 failed !");
 		exit(-1);
 	}
 	char Isborrowed[5] = "";
@@ -385,16 +380,22 @@ BOOL DatabaseControl::Borrow(std::string ISBN,DatabaseControl*& borrow_con)
 	borrow_con = new DatabaseControl();
 	ret = SQLAllocHandle(SQL_HANDLE_STMT, borrow_con->hdbc, &borrow_con->hstmt);
 	ret = SQLSetStmtAttr(borrow_con->hstmt, SQL_ATTR_ROW_BIND_TYPE, (SQLPOINTER)SQL_PARAM_BIND_BY_COLUMN, SQL_IS_INTEGER);
-	std::string snum(cnum), sname(cname), sBookName(BookName);
+	std::string snum(cnum), sname(cname);
 	sname += ',' + sBookName;
 	/*将用户结束数量加1*/
 	int inum = stoi(snum);
 	snum = std::to_string(++inum);
 	/*开始修改数据库信息*/
-	std::string update1 = "begin tran UPDATE BOOK SET Isborrowed = 0 UPDATE StuBook SET BorrowedBookNum = ";
-	combine1 = update1 + snum;
-	std::string update2 = " UPDATE StuBook SET BorrowedBookName = ";
-	std::string finalcombine = combine1 + update2 + '\'' + sname + '\'' + " commit tran";
+	std::string update1 = "begin tran UPDATE BOOK SET Isborrowed = 0 ";
+	std::string uwhere1 = "WHERE ISBN = ";
+	combine1 = update1 + uwhere1 + '\'' + ISBN + '\'';
+	std::string update2 = "UPDATE StuBook SET BorrowedBookNum = ";
+	std::string uwhere2 = "WHERE StuID = ";
+	combine2 = update2 + snum + uwhere2 + '\'' + UserInformation::m_ID + '\'';
+	std::string update3 = " UPDATE StuBook SET BorrowedBookName = ";
+	std::string uwhere = "WHERE StuID = ";
+	std::string combine3 = update3 + '\'' + sBookName + " \'" + uwhere + '\'' + UserInformation::m_ID + '\'';
+	std::string finalcombine = combine1 + combine2 + combine3 + " commit tran";
 	SQLSentence = finalcombine.c_str();
 	ret = SQLPrepare(borrow_con->hstmt, (SQLCHAR*)SQLSentence, SQL_NTS);
 	if (!SQLSUCCESS(ret))
@@ -412,10 +413,13 @@ BOOL DatabaseControl::Borrow(std::string ISBN,DatabaseControl*& borrow_con)
 		cBookName[cnt] = sname[cnt];
 		++cnt;
 	}
-	for (cnt = 0;cnt < 10; ++cnt)
+	cnt = 0;
+	while (snum[cnt] != NULL)
 	{
 		BookNum[cnt] = snum[cnt];
+		++cnt;
 	}
+	
 	ret = SQLBindParameter(borrow_con->hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_CHAR, 2, 0, Isborrowed, 2, &ISlen);
 	ret = SQLBindParameter(borrow_con->hstmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_CHAR, 30, 0, cBookName, 1000, &BNamelen);
 	ret = SQLBindParameter(borrow_con->hstmt, 3, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_CHAR, 10, 0, BookNum, 10, &BNumlen);
@@ -430,5 +434,172 @@ BOOL DatabaseControl::Borrow(std::string ISBN,DatabaseControl*& borrow_con)
 	}
 	delete borrow_con;
 	return 1;
+
+}
+
+void DatabaseControl::SelfInformationPrint(DatabaseControl*& selfinfor_con)
+{
+	/*用户信息包括：
+	  学号、名字、性别、专业班级、学院、借书数量、借书书名、违规次数、欠款金额、信誉分值*/
+	SQLRETURN ret;
+	ret = SQLAllocHandle(SQL_HANDLE_STMT, selfinfor_con->hdbc, &selfinfor_con->hstmt);
+	ret = SQLSetStmtAttr(selfinfor_con->hstmt, SQL_ATTR_ROW_BIND_TYPE, (SQLPOINTER)SQL_PARAM_BIND_BY_COLUMN, SQL_IS_INTEGER);
+	std::string select1 = "SELECT* FROM Student WHERE StuID = ";
+	std::string combine1 = select1 + '\'' + UserInformation::m_ID + " \'";
+	const char* SQLSentence = combine1.c_str();
+	
+	
+
+	SQLPrepare(selfinfor_con->hstmt, (SQLCHAR*)SQLSentence, SQL_NTS);
+	char StuID[15] = "", StuName[25] = "", Sex[5] = "", SpecialityAndClass[30] = "",
+		Department[30] = "", BorrowedBookNum[5] = "", BorrowedBookName[1000] = "",
+		Violations[5] = "", Arrearage[5] = "", Feedback_score[4] = "";
+	long StuID_len = 0, StuName_len = 0, Sex_len = 0, SpecialityAndClass_len = 0, 
+		Department_len = 0,BorrowedBookNum_len = 0, BorrowedBookName_len = 0, 
+		Violations_len = 0, Arrearage_len = 0,Feedback_score_len = 0;
+	SQLBindCol(selfinfor_con->hstmt, 1, SQL_C_CHAR, StuID, 15, &StuID_len);
+	SQLBindCol(selfinfor_con->hstmt, 2, SQL_C_CHAR, StuName, 25, &StuName_len);
+	SQLBindCol(selfinfor_con->hstmt, 3, SQL_C_CHAR, Sex, 5, &Sex_len);
+	SQLBindCol(selfinfor_con->hstmt, 4, SQL_C_CHAR, Department, 30, &Department_len);
+	SQLBindCol(selfinfor_con->hstmt, 5, SQL_C_CHAR, SpecialityAndClass, 30, &SpecialityAndClass_len);
+	SQLExecute(selfinfor_con->hstmt);
+	while (ret = SQLFetchScroll(selfinfor_con->hstmt, SQL_FETCH_NEXT, 0) != SQL_NO_DATA_FOUND)
+	{
+		;
+	}
+	delete selfinfor_con;
+
+	selfinfor_con = new DatabaseControl();;
+	ret = SQLAllocHandle(SQL_HANDLE_STMT, selfinfor_con->hdbc, &selfinfor_con->hstmt);
+	ret = SQLSetStmtAttr(selfinfor_con->hstmt, SQL_ATTR_ROW_BIND_TYPE, (SQLPOINTER)SQL_PARAM_BIND_BY_COLUMN, SQL_IS_INTEGER);
+	std::string select2 = "SELECT* FROM StuFeedback_score WHERE StuID = ";
+	std::string combine2 = select2 + '\'' + UserInformation::m_ID + " \'";
+	SQLSentence = combine2.c_str();
+	SQLPrepare(selfinfor_con->hstmt, (SQLCHAR*)SQLSentence, SQL_NTS);
+	SQLBindCol(selfinfor_con->hstmt, 1, SQL_C_CHAR, StuID, 15, &StuID_len);
+	SQLBindCol(selfinfor_con->hstmt, 2, SQL_C_CHAR, Feedback_score, 4, &Feedback_score_len);
+	SQLBindCol(selfinfor_con->hstmt, 3, SQL_C_CHAR, Violations, 5, &Violations_len);
+	SQLBindCol(selfinfor_con->hstmt, 4, SQL_C_CHAR, Arrearage, 5, &Arrearage_len);
+	SQLExecute(selfinfor_con->hstmt);
+	while (ret = SQLFetchScroll(selfinfor_con->hstmt, SQL_FETCH_NEXT, 0) != SQL_NO_DATA_FOUND)
+	{
+		;
+	}
+	delete selfinfor_con;
+	
+	selfinfor_con = new DatabaseControl();
+	ret = SQLAllocHandle(SQL_HANDLE_STMT, selfinfor_con->hdbc, &selfinfor_con->hstmt);
+	ret = SQLSetStmtAttr(selfinfor_con->hstmt, SQL_ATTR_ROW_BIND_TYPE, (SQLPOINTER)SQL_PARAM_BIND_BY_COLUMN, SQL_IS_INTEGER);
+	std::string select3 = "SELECT* FROM StuBook WHERE StuID = ";
+	std::string combine3 = select3 + '\'' + UserInformation::m_ID + " \'";
+	SQLSentence = combine3.c_str();
+	SQLPrepare(selfinfor_con->hstmt, (SQLCHAR*)SQLSentence, SQL_NTS);
+	SQLBindCol(selfinfor_con->hstmt, 1, SQL_C_CHAR, StuID, 15, &StuID_len);
+	SQLBindCol(selfinfor_con->hstmt, 2, SQL_C_CHAR, BorrowedBookNum, 5, &BorrowedBookNum_len);
+	SQLBindCol(selfinfor_con->hstmt, 3, SQL_C_CHAR, BorrowedBookName, 1000, &BorrowedBookName_len);
+	SQLExecute(selfinfor_con->hstmt);
+	while (ret = SQLFetchScroll(selfinfor_con->hstmt, SQL_FETCH_NEXT, 0) != SQL_NO_DATA_FOUND)
+	{
+		;
+	}
+
+	printf("姓名：%s\t学号%s\t性别：%s\t学院：%s\t专业班级：%s\n书籍在借数量：%s\n借用书籍名：%s\n违规次数：%s\n欠款金额：%s\n信誉分值：%s\n",
+		StuName, StuID, Sex, Department, SpecialityAndClass, BorrowedBookNum,
+		BorrowedBookName, Violations, Arrearage, Feedback_score);
+	system("pause");
+	system("cls");
+	delete selfinfor_con;
+}
+
+
+
+BOOL DatabaseControl::ReturnBook(std::string ISBN,DatabaseControl*& returnbook_con)
+{
+	SQLRETURN ret;
+	ret = SQLAllocHandle(SQL_HANDLE_STMT, returnbook_con->hdbc, &returnbook_con->hstmt);
+	ret = SQLSetStmtAttr(returnbook_con->hstmt, SQL_ATTR_ROW_BIND_TYPE, (SQLPOINTER)SQL_PARAM_BIND_BY_COLUMN, SQL_IS_INTEGER);
+	if (!SQLSUCCESS(ret))
+	{
+		exit(-1);
+	}
+
+	std::string YesorNot;
+	std::string swhere = "SELECT BookName FROM BOOK WHERE ISBN = ";
+	std::string combine1 = swhere + '\'' + ISBN + '\'';
+	const char* SQLSentence = combine1.c_str();
+	ret = SQLPrepare(returnbook_con->hstmt, (SQLCHAR*)SQLSentence, SQL_NTS);
+	if (!SQLSUCCESS(ret))
+	{
+		exit(-1);
+	}
+	char BookName[30] = "";
+	long BookName_len = 0;
+	ret = SQLBindCol(returnbook_con->hstmt, 1, SQL_C_CHAR, BookName, 30, &BookName_len);
+	ret = SQLExecute(returnbook_con->hstmt);
+	if (ret = SQLFetchScroll(returnbook_con->hstmt, SQL_FETCH_NEXT, 0) != SQL_NO_DATA_FOUND)
+	{
+
+	}
+	std::string sBookName(BookName);
+	if (sBookName.empty())
+	{
+		std::cerr << "该书不存在！" << std::endl;
+		Sleep(700);
+		system("cls");
+		return 0;
+	}
+
+	if (!sBookName.empty())
+	{
+		std::cout << "是否确认归还 " << BookName << " 这本书？" << std::endl;
+		std::cout << "是      否" << std::endl;
+		std::getline(std::cin, YesorNot);
+		if (YesorNot.find("是") == std::string::npos)
+		{
+			return 0;
+		}
+	}
+	delete returnbook_con;		//释放句柄和环境
+
+	ret = SQLAllocHandle(SQL_HANDLE_STMT, returnbook_con->hdbc, &returnbook_con->hstmt);
+	ret = SQLSetStmtAttr(returnbook_con->hstmt, SQL_ATTR_ROW_BIND_TYPE, (SQLPOINTER)SQL_PARAM_BIND_BY_COLUMN, SQL_IS_INTEGER);
+	/*先获取用户已借书籍数量和书名*/
+	std::string swhere1 = "SELECT BorrowedBookNum,BorrowedBookName FROM StuBook WHERE StuID = ";
+	combine1 = swhere1 + '\'' + UserInformation::m_ID + '\'';
+	SQLSentence = combine1.c_str();
+	ret = SQLPrepare(returnbook_con->hstmt, (SQLCHAR*)SQLSentence, SQL_NTS);
+	if (!SQLSUCCESS(ret))
+	{
+		exit(-1);
+	}
+	char cnum[10] = "";
+	char cname[30] = "";
+	long cnum_len = 0, cname_len = 0;
+	ret = SQLBindCol(returnbook_con->hstmt, 1, SQL_C_CHAR, cnum, 10, &cnum_len);
+	ret = SQLBindCol(returnbook_con->hstmt, 2, SQL_C_CHAR, cname, 30, &cname_len);
+	if (!SQLSUCCESS(ret))
+	{
+		exit(-1);
+	}
+	ret = SQLExecute(returnbook_con->hstmt);
+	if (!SQLSUCCESS(ret))
+	{
+		exit(-1);
+	}
+	if (ret = SQLFetch(returnbook_con->hstmt) != SQL_NO_DATA_FOUND)
+	{
+
+	}
+	delete returnbook_con;
+	int inum = atoi(cnum);
+	--inum;
+	std::string lended_book;
+	/*1月19日修改：
+	已完成借书模块，解决了借书模块的bug，和用户信息打印模块；正在进行还书模块
+	我现在卡在如何将用户想要归还的书籍从已借书籍名单中删除，即找到改书籍的名字，然后将该书籍从名单中除名*/
+
+
+
+
 
 }
