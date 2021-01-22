@@ -134,9 +134,27 @@ void Reader::SelfInformation() const
 
 void Reader::ReturnBook() const
 {
-	DatabaseControl* returnbook_con = new DatabaseControl();
 	std::string ISBN;
-	returnbook_con->ReturnBook(ISBN, returnbook_con);
+	while (1)
+	{
+		DatabaseControl* returnbook_con = new DatabaseControl();
+		printf("请输入你想还的书的ISBN号：");
+		std::getline(std::cin, ISBN);
+		inter->Exit(1, 1, ISBN);
+		BOOL bl = 0;
+		bl = returnbook_con->ReturnBook(ISBN, returnbook_con);
+		if (0 == bl)
+		{
+			continue;
+		}
+		else
+		{
+			printf("还书成功！");
+			Sleep(1000);
+			system("cls");
+		}
+
+	}
 
 
 }

@@ -9,7 +9,7 @@ using namespace std;
 string& _interface::FirstChoose()
 {
 	/*登录界面*/
-	/*printf("\n");
+	printf("\n");
 	for (int i = 0;i < 30;++i)
 	{
 		printf(" ");
@@ -41,7 +41,7 @@ string& _interface::FirstChoose()
 	for (int i = 0;i < 70;++i)
 	{
 		printf("-");
-	}*/
+	}
 	printf("\n请选择：");
 
 	static string choose;
@@ -78,7 +78,7 @@ void _interface::Administrator_Sign_Interface()
 void _interface::ReaderInterface()
 {
 	/*查书，借书，还书，个人基本信息，我要还款，修改密码等入口*/
-	/*printf("\n");
+	printf("\n");
 	for (int i = 0;i < 30;++i)
 	{
 		printf(" ");
@@ -117,17 +117,17 @@ void _interface::ReaderInterface()
 	{
 		printf(" ");
 	}
-	printf("E.我要还款\n\n");
+	/*printf("E.我要还款\n\n");			//实在是懒得做信用度模块和欠款模块了。。。
+	for (int i = 0;i < 37;++i)			//感觉要实现借书时间限制又是个大工程，懒了。。。
+	{
+		printf(" ");
+	}*/
+	printf("E.修改密码\n\n");
 	for (int i = 0;i < 37;++i)
 	{
 		printf(" ");
 	}
-	printf("F.修改密码\n\n");
-	for (int i = 0;i < 37;++i)
-	{
-		printf(" ");
-	}
-	printf("G.退出\n\n");
+	printf("F.退出\n\n");
 	for (int i = 0;i < 10;++i)
 	{
 		printf(" ");
@@ -137,7 +137,7 @@ void _interface::ReaderInterface()
 		printf("-");
 	}
 	printf("\n请选择：");
-	*/
+	
 }
 
 void _interface::AdministratorInterface()
@@ -147,7 +147,7 @@ void _interface::AdministratorInterface()
 	{
 		printf(" ");
 	}
-	printf("***欢迎使用图书管理系统***\n");
+	printf("***欢迎使用图书管理系统***\n");		//管理员端感觉都是些重复的东西，懒得做了。。。
 	for (int i = 0;i < 10;++i)
 	{
 		printf(" ");
@@ -235,15 +235,12 @@ void _interface::ReaderChoose()
 			re.BorrowBook();
 			break;
 		case 'D':
-
+			re.ReturnBook();
 			break;
 		case 'E':
-
-			break;
-		case 'F':
 			re.ChangePassword();
 			break;
-		case 'G':
+		case 'F':
 			printf("再见！！！\n");
 			exit(0);
 			break;
